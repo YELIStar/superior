@@ -1,0 +1,13 @@
+.conversationItem {
+    cursor: pointer;
+    background-color: transparent;
+    padding: 12px 16px;
+}
+
+.conversationItem.active {
+    background-color: #e6f7ff;
+}
+
+.conversationItem:hover {
+    background-color: #f5f5f5;
+}
