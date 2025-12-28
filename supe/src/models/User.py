@@ -1,11 +1,36 @@
-# from __future__ import annotations
 from datetime import datetime
-from sqlmodel import VARCHAR, BigInteger, Field, Relationship, SQLModel, SmallInteger, DateTime
+from enum import IntEnum
 
-from utils.RandString import random_string
+from sqlmodel import VARCHAR, BigInteger, Field, SQLModel, SmallInteger, DateTime, CHAR
 
-# User profile
+
+class user_status_enum(IntEnum):
+    """
+    用户状态：0-离线，1-在线，2-忙碌，3-勿扰
+    """
+    offline = 0
+    online = 1
+    busy = 2
+    do_not_disturb = 3
+
+class gender_enum(IntEnum):
+    """
+    性别：0-未知，1-男，2-女
+    """
+    unknown = 0
+    male = 1
+    female = 2
+
+
 class User(SQLModel, table=True):
+    """用户信息表
+    必填字段:
+        电话号、密码哈希值、昵称、最后登录IP
+    默认字段:
+        用户状态、最后登录时间、创建时间、删除时间（软删除）
+    选填字段:
+        邮箱、性别、生日、签名、头像URL、省份、城市
+    """
     user_id: int = Field(
         default=None,
         index=True,
@@ -13,71 +38,86 @@ class User(SQLModel, table=True):
         unique=True,
         sa_type=BigInteger
     )
+
     phone: str = Field(
         unique=True,
-        sa_type=VARCHAR(length=20)
+        max_length=11,
+        sa_type=VARCHAR(length=11)
     )
+    
     password_hash: str = Field(
-        sa_type=VARCHAR(length=255)
-    ) # 加密后的密码（bcrypt/MD5 + 盐值）
-    status: int = Field(
-        default=1, # 1: online, 0: offline
+        sa_type=CHAR(length=60)
+    )
+    """bcrypt 哈希后的密码，长度固定为 60 字符"""
+    
+    user_status: user_status_enum = Field(
+        default=user_status_enum.online,
         sa_type=SmallInteger
     )
-    username: str = Field(
-        default_factory=lambda: random_string(10),
-        unique=True,
-        sa_type=VARCHAR(length=50)
-    )
-    avatar: str | None = Field(
-        default=None,
-        sa_type=VARCHAR(length=255)
-    )
+    
     email: str | None = Field(
         default=None,
         unique=True,
-        sa_type=VARCHAR(length=100)
+        max_length=64,
+        sa_type=VARCHAR(length=64)
     )
-    last_login: datetime = Field(
+    
+    gender: gender_enum = Field(
+        default=gender_enum.unknown,
+        sa_type=SmallInteger
+    )
+    
+    birthday: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True)
+    )
+    
+    nickname: str = Field(
+        unique=True,
+        max_length=32,
+        sa_type=VARCHAR(length=32)
+    )
+    
+    signature: str | None = Field(
+        default=None,
+        sa_type=VARCHAR(length=255)
+    )
+    
+    avatar_url: str | None = Field(
+        default=None,
+        sa_type=VARCHAR(length=255)
+    )
+    
+    province: str | None = Field(
+        default=None,
+        sa_type=VARCHAR(length=32)
+    )
+    
+    city: str | None = Field(
+        default=None,
+        sa_type=VARCHAR(length=32)
+    )
+    
+    last_login_at: datetime = Field(
         default_factory=lambda: datetime.now(),
         sa_type=DateTime(timezone=True)
     )
+    
+    last_login_ip: str = Field(
+        sa_type=VARCHAR(length=45)
+    )
+    
     create_at: datetime = Field(
         default_factory=lambda: datetime.now(),
         sa_type=DateTime(timezone=True)
     )
-    # frieouping_foreign: Mapped[list["Frieouping"]] = Relationship(back_populates="user_foreign")
-
-# User request model
-class UserCreate(SQLModel):
-    phone: str
-    password_hash: str
-
-# User update model
-class UserUpdate(SQLModel):
-    phone: str
-    password_hash: str
-    username: str
-    avatar: str | None = Field(default=None)
-    email: str | None = Field(default=None)
-    status: int = Field(default=1)
-
-# User register model
-class UserRegister(SQLModel):
-    phone: str
-    password: str
-    username: str | None = None
-    email: str | None = None
-
-# Password reset model
-class PasswordReset(SQLModel):
-    token: str
-    new_password: str
-
-# User response model
-class UserResponse(SQLModel):
-    phone: str
-    username: str
-    avatar: str | None
-    email: str | None
-    status: int
+    
+    delete_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True)
+    )
+    """软删除时间，若为 None 则表示未删除"""
+    
+    model_config = {
+        "extra": "ignore"
+    } # type: ignore

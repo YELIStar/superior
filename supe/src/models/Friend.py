@@ -1,10 +1,14 @@
 from datetime import datetime
-from sqlmodel import SMALLINT, VARCHAR, BigInteger, Field, ForeignKey, SQLModel, SmallInteger
+from sqlmodel import SMALLINT, VARCHAR, BigInteger, DateTime, Field, ForeignKey, SQLModel, SmallInteger
 from typing import Optional
 
-# Friends list
-class Friends(SQLModel, table=True):
-    id: int = Field(
+
+class Friend(SQLModel, table=True):
+    """
+    好友列表
+    """
+    user_friend_id: int = Field(
+        default=None,
         primary_key=True,
         unique=True,
         sa_type=BigInteger
@@ -25,6 +29,7 @@ class Friends(SQLModel, table=True):
         foreign_key="frieouping.group_id",
         sa_type=BigInteger
     )
-    created_at: datetime = Field(
-        default_factory=lambda: datetime.now()
+    associate_at: datetime = Field(
+        default_factory=lambda: datetime.now(),
+        sa_type=DateTime(True)
     )

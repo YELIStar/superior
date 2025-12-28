@@ -12,10 +12,10 @@ from crud.Messages import (
 from dependencies.auth import get_current_user
 from models.User import User
 
-Mrouter: APIRouter = APIRouter(tags=["Messages"])
+Message_router: APIRouter = APIRouter(tags=["Messages"])
 
 
-@Mrouter.post("/", response_model=Messages)
+@Message_router.post("/", response_model=Messages)
 def send_message(
     conversation_id: int,
     content: str,
@@ -36,7 +36,7 @@ def send_message(
     )
 
 
-@Mrouter.get("/conversation/{conversation_id}", response_model=List[Messages])
+@Message_router.get("/conversation/{conversation_id}", response_model=List[Messages])
 def get_conversation_messages(
     conversation_id: int,
     offset: int = 0,
@@ -53,7 +53,7 @@ def get_conversation_messages(
     )
 
 
-@Mrouter.patch("/{message_id}/recall")
+@Message_router.patch("/{message_id}/recall")
 def recall_message(
     message_id: int,
     current_user: User = Depends(get_current_user),

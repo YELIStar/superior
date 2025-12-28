@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 from typing import List
 
-from core.database import get_session
-from models.Friends import Friends
-from crud.Friends import (
+from dependencies.database import get_session
+from models.Friend import Friend
+from cruds.Friend import (
     crud_add_friend,
     crud_get_user_friends,
     crud_delete_friend
@@ -12,10 +12,10 @@ from crud.Friends import (
 from dependencies.auth import get_current_user
 from models.User import User
 
-Frouter: APIRouter = APIRouter(tags=["Friends"])
+Friend_router: APIRouter = APIRouter(tags=["Friend"])
 
 
-@Frouter.post("/", response_model=Friends)
+@Friend_router.post("/", response_model=Friend)
 def add_friend(
     friend_id: int,
     group_id: int,
@@ -45,7 +45,7 @@ def add_friend(
     return friend
 
 
-@Frouter.get("/", response_model=List[Friends])
+@Friend_router.get("/", response_model=List[Friend])
 def get_friends(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_session)
@@ -54,7 +54,7 @@ def get_friends(
     return crud_get_user_friends(session=db, user_id=current_user.user_id)
 
 
-@Frouter.delete("/{friend_id}")
+@Friend_router.delete("/{friend_id}")
 def delete_friend(
     friend_id: int,
     current_user: User = Depends(get_current_user),
